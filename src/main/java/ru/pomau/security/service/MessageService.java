@@ -33,7 +33,7 @@ public class MessageService extends MainService{
     }
 
     public List<Message> find(Chat chat) {
-        List<MessageEntity> messages = messageRepo.findByChat_Id(chat.getId());
+        List<MessageEntity> messages = messageRepo.findByChat_IdOrderByCreatedDateAsc(chat.getId());
         return messages.stream().map(Message::toModel).collect(Collectors.toList());
     }
 

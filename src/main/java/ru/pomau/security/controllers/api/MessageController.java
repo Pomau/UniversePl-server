@@ -55,6 +55,7 @@ public class MessageController {
                                             @RequestBody MessageEntity message) {
         try {
             ProfileEntity user = profileService.getEntity(profileService.getBySession(session));
+            message.setUser(user);
             ChatEntity chatEntity = chatService.getEntity(chatService.findById(message.getChat().getId()));
             messageService.create(message);
             return ResponseEntity.ok().body(HttpStatus.OK);

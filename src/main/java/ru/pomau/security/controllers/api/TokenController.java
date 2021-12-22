@@ -11,6 +11,7 @@ import ru.pomau.security.entity.ProfileEntity;
 import ru.pomau.security.entity.TokenEntity;
 import ru.pomau.security.models.Chat;
 import ru.pomau.security.models.Message;
+import ru.pomau.security.models.Profile;
 import ru.pomau.security.models.Token;
 import ru.pomau.security.service.ChatService;
 import ru.pomau.security.service.MessageService;
@@ -42,7 +43,7 @@ public class TokenController {
             ProfileEntity user = profileService.getEntity(profileService.getBySession(session));
             ChatEntity chatEntity = chatService.getEntity(chat);
             if (chatEntity.getUsers().contains(user)) {
-                return tokenService.find(chat);
+                return tokenService.find(chat, Profile.toModel(user));
             }
         } catch (Exception e){
             System.out.println(session + " - " + chat);
@@ -55,9 +56,18 @@ public class TokenController {
                                             @RequestBody TokenEntity token) {
         try {
             ProfileEntity user = profileService.getEntity(profileService.getBySession(session));
+            token.setUser(user);
             ChatEntity chatEntity = chatService.getEntity(chatService.findById(token.getChat().getId()));
-            tokenService.create(token);
-            return ResponseEntity.ok().body(HttpStatus.OK);
+            if (chatEntity.getStatus() == 3 && chatEntity.getCreateUser().getId().equals(user.getId())) {
+                tokenService.create(token);
+                chatEntity.setStatus(4);
+                chatService.updateStep(chatEntity);
+                return ResponseEntity.ok().body(HttpStatus.OK);
+            } else if (chatEntity.getStatus() == 2 && !chatEntity.getCreateUser().getId().equals(user.getId())) {
+                tokenService.create(token);
+                chatService.updateStep(chatEntity);
+                return ResponseEntity.ok().body(HttpStatus.OK);
+            }
         } catch (Exception e){
             System.out.println(session);
         }

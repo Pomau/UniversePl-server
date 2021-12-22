@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface MessageRepo extends CrudRepository<MessageEntity, String> {
-    List<MessageEntity> findByChat_Id(String id);
+    List<MessageEntity> findByChat_IdOrderByCreatedDateAsc(String id);
 }

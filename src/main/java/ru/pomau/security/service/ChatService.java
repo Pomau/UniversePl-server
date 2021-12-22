@@ -6,6 +6,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.pomau.security.entity.ChatEntity;
 import ru.pomau.security.entity.ProfileEntity;
+import ru.pomau.security.exception.UpdateNotAvailableExistException;
 import ru.pomau.security.exception.UserAlreadyExistException;
 import ru.pomau.security.exception.UserNotFoundException;
 import ru.pomau.security.interfaces.ChatsObject;
@@ -55,7 +56,7 @@ public class ChatService extends MainService{
         return chats.stream().map(Chat::toModel).collect(Collectors.toList());
     }
 
-    public void createToken(Profile profile, String chatId, String key) throws UserNotFoundException {
+    public void createToken(Profile profile, String chatId, String key) throws UpdateNotAvailableExistException {
         ProfileEntity user = profileRepo.findById(profile.getId()).get();
         ChatEntity chat = chatRepo.findById(chatId).get();
         if (chat.getStatus() == 1 && chat.getCreateUser().getId().equals(user.getId())) {
@@ -65,6 +66,8 @@ public class ChatService extends MainService{
                    chat.getUsers().contains(user)) {
             chat.setPublicKeyUser1(key);
             chat.setStatus(3);
+        } else {
+            throw new UpdateNotAvailableExistException("Обновление токена не доступно");
         }
         chatRepo.save(chat);
     }
@@ -83,6 +86,10 @@ public class ChatService extends MainService{
             throw new UserNotFoundException("Пользователь не найден");
         }
         return Chat.toModel(chatEntity.get());
+    }
+
+    public Chat updateStep(ChatEntity chatEntity) {
+        return Chat.toModel(chatRepo.save(chatEntity));
     }
 
 }

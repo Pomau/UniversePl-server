@@ -5,20 +5,21 @@ import ru.pomau.security.entity.ChatEntity;
 import ru.pomau.security.entity.MessageEntity;
 import ru.pomau.security.entity.ProfileEntity;
 
+import java.sql.Timestamp;
 
 
 public class Message {
     private String id;
     private String text;
-    private Chat chat;
     private Profile user;
+    private Timestamp createdDate;
 
     public static Message toModel(MessageEntity entity) {
         Message model = new Message();
         model.setId(entity.getId());
         model.setText(entity.getText());
-        model.setChat(Chat.toModel(entity.getChat()));
         model.setUser(Profile.toModel(entity.getUser()));
+        model.setCreatedDate(entity.getCreatedDate());
         return model;
     }
 
@@ -39,13 +40,6 @@ public class Message {
         this.text = text;
     }
 
-    public Chat getChat() {
-        return chat;
-    }
-
-    public void setChat(Chat chat) {
-        this.chat = chat;
-    }
 
     public Profile getUser() {
         return user;
@@ -53,5 +47,13 @@ public class Message {
 
     public void setUser(Profile user) {
         this.user = user;
+    }
+
+    public Timestamp getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Timestamp createdDate) {
+        this.createdDate = createdDate;
     }
 }

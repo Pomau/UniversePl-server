@@ -9,5 +9,5 @@ import java.util.List;
 
 @Repository
 public interface TokenRepo extends CrudRepository<TokenEntity, String> {
-    TokenEntity findByChat_Id(String id);
+    TokenEntity findByChat_IdAndUser_Id(String chatId, String userId);
 }

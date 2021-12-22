@@ -6,6 +6,7 @@ import ru.pomau.security.entity.TokenEntity;
 import ru.pomau.security.exception.UserNotFoundException;
 import ru.pomau.security.models.Chat;
 import ru.pomau.security.models.Message;
+import ru.pomau.security.models.Profile;
 import ru.pomau.security.models.Token;
 
 import java.util.List;
@@ -20,8 +21,8 @@ public class TokenService extends MainService{
         tokenRepo.save(tokenEntity);
     }
 
-    public Token find(Chat chat) {
-        TokenEntity token = tokenRepo.findByChat_Id(chat.getId());
+    public Token find(Chat chat, Profile profile) {
+        TokenEntity token = tokenRepo.findByChat_IdAndUser_Id(chat.getId(), profile.getId());
         return Token.toModel(token);
     }
 

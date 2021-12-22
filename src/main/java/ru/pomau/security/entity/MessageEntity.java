@@ -1,9 +1,11 @@
 package ru.pomau.security.entity;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UpdateTimestamp;
 import ru.pomau.security.interfaces.ChatsObject;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name="messages")
@@ -14,6 +16,9 @@ public class MessageEntity implements ChatsObject {
     @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String id;
     private String text;
+
+    @UpdateTimestamp
+    private Timestamp createdDate;
 
     @ManyToOne
     private ChatEntity chat;
@@ -34,6 +39,14 @@ public class MessageEntity implements ChatsObject {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public Timestamp getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Timestamp createdDate) {
+        this.createdDate = createdDate;
     }
 
     public ChatEntity getChat() {

@@ -13,6 +13,7 @@ public class Token {
     public static Token toModel(TokenEntity entity) {
         Token model = new Token();
         model.setId(entity.getId());
+        model.setToken(entity.getToken());
         model.setChat(Chat.toModel(entity.getChat()));
         model.setUser(Profile.toModel(entity.getUser()));
         return model;

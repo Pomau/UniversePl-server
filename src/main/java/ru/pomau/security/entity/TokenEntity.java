@@ -1,6 +1,7 @@
 package ru.pomau.security.entity;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UpdateTimestamp;
 import ru.pomau.security.interfaces.ChatsObject;
 
 import javax.persistence.*;
@@ -15,6 +16,7 @@ public class TokenEntity implements ChatsObject {
     @GenericGenerator(name="system-uuid", strategy = "uuid")
     private String id;
     private String token;
+    @UpdateTimestamp
     private Timestamp createdDate;
 
     @ManyToOne

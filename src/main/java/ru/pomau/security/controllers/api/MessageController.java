@@ -9,6 +9,7 @@ import ru.pomau.security.additional.Security;
 import ru.pomau.security.entity.ChatEntity;
 import ru.pomau.security.entity.MessageEntity;
 import ru.pomau.security.entity.ProfileEntity;
+import ru.pomau.security.exception.UserNotFoundException;
 import ru.pomau.security.models.Chat;
 import ru.pomau.security.models.Message;
 import ru.pomau.security.models.Profile;
@@ -37,32 +38,23 @@ public class MessageController {
 
     @PostMapping("/get")
     public List<Message> findMessage(@CookieValue("session") String session,
-                                     @RequestBody Chat chat) {
-        try {
-            ProfileEntity user = profileService.getEntity(profileService.getBySession(session));
-            ChatEntity chatEntity = chatService.getEntity(chat);
-            if (chatEntity.getUsers().contains(user)) {
-                return messageService.find(chat);
-            }
-        } catch (Exception e){
-            System.out.println(session + " - " + chat);
+                                     @RequestBody Chat chat) throws UserNotFoundException {
+        ProfileEntity user = profileService.getEntity(profileService.getBySession(session));
+        ChatEntity chatEntity = chatService.getEntity(chat);
+        if (chatEntity.getUsers().contains(user)) {
+            return messageService.find(chat);
         }
         return null;
     }
 
     @PostMapping("/create")
     public ResponseEntity<?> findNoWorkChat(@CookieValue("session") String session,
-                                            @RequestBody MessageEntity message) {
-        try {
-            ProfileEntity user = profileService.getEntity(profileService.getBySession(session));
-            message.setUser(user);
-            ChatEntity chatEntity = chatService.getEntity(chatService.findById(message.getChat().getId()));
-            messageService.create(message);
-            return ResponseEntity.ok().body(HttpStatus.OK);
-        } catch (Exception e){
-            System.out.println(session);
-        }
-        return ResponseEntity.badRequest().body("Error");
+                                            @RequestBody MessageEntity message) throws UserNotFoundException {
+        ProfileEntity user = profileService.getEntity(profileService.getBySession(session));
+        message.setUser(user);
+        chatService.findById(message.getChat().getId());
+        messageService.create(message);
+        return ResponseEntity.ok().body(HttpStatus.OK);
     }
 
 }

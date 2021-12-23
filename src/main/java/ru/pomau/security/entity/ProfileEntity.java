@@ -3,6 +3,7 @@ package ru.pomau.security.entity;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name="profiles")
@@ -56,6 +57,14 @@ public class ProfileEntity {
 
     public void setSessionKey(String sessionKey) {
         this.sessionKey = sessionKey;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProfileEntity profile = (ProfileEntity) o;
+        return id.equals(profile.getId());
     }
 
     @Override

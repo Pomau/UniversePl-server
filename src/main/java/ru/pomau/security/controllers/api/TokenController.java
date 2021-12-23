@@ -9,6 +9,8 @@ import ru.pomau.security.entity.ChatEntity;
 import ru.pomau.security.entity.MessageEntity;
 import ru.pomau.security.entity.ProfileEntity;
 import ru.pomau.security.entity.TokenEntity;
+import ru.pomau.security.exception.UserNotFoundException;
+import ru.pomau.security.exception.СantСreateException;
 import ru.pomau.security.models.Chat;
 import ru.pomau.security.models.Message;
 import ru.pomau.security.models.Profile;
@@ -38,40 +40,34 @@ public class TokenController {
 
     @PostMapping("/get")
     public Token findMessage(@CookieValue("session") String session,
-                             @RequestBody Chat chat) {
-        try {
-            ProfileEntity user = profileService.getEntity(profileService.getBySession(session));
-            ChatEntity chatEntity = chatService.getEntity(chat);
-            if (chatEntity.getUsers().contains(user)) {
-                return tokenService.find(chat, Profile.toModel(user));
-            }
-        } catch (Exception e){
-            System.out.println(session + " - " + chat);
+                             @RequestBody Chat chat) throws UserNotFoundException {
+        ProfileEntity user = profileService.getEntity(profileService.getBySession(session));
+        ChatEntity chatEntity = chatService.getEntity(chat);
+        if (chatEntity.getUsers().contains(user)) {
+            return tokenService.find(chat, Profile.toModel(user));
         }
         return null;
     }
 
     @PostMapping("/create")
     public ResponseEntity<?> findNoWorkChat(@CookieValue("session") String session,
-                                            @RequestBody TokenEntity token) {
-        try {
-            ProfileEntity user = profileService.getEntity(profileService.getBySession(session));
-            token.setUser(user);
-            ChatEntity chatEntity = chatService.getEntity(chatService.findById(token.getChat().getId()));
-            if (chatEntity.getStatus() == 3 && chatEntity.getCreateUser().getId().equals(user.getId())) {
-                tokenService.create(token);
-                chatEntity.setStatus(4);
-                chatService.updateStep(chatEntity);
-                return ResponseEntity.ok().body(HttpStatus.OK);
-            } else if (chatEntity.getStatus() == 2 && !chatEntity.getCreateUser().getId().equals(user.getId())) {
-                tokenService.create(token);
-                chatService.updateStep(chatEntity);
-                return ResponseEntity.ok().body(HttpStatus.OK);
-            }
-        } catch (Exception e){
-            System.out.println(session);
+                                            @RequestBody TokenEntity token) throws UserNotFoundException, СantСreateException {
+        ProfileEntity user = profileService.getEntity(profileService.getBySession(session));
+        token.setUser(user);
+        ChatEntity chatEntity = chatService.getEntity(chatService.findById(token.getChat().getId()));
+        if (chatEntity.getStatus() == 3 && chatEntity.getCreateUser().getId().equals(user.getId())) {
+            tokenService.create(token);
+            chatEntity.setStatus(4);
+            chatService.updateStep(chatEntity);
+            return ResponseEntity.ok().body(HttpStatus.OK);
+        } else if (chatEntity.getStatus() == 2 && !chatEntity.getCreateUser().getId().equals(user.getId())) {
+            tokenService.create(token);
+            chatService.updateStep(chatEntity);
+            return ResponseEntity.ok().body(HttpStatus.OK);
+        }else {
+            throw new СantСreateException("Вы не можете создать токен");
         }
-        return ResponseEntity.badRequest().body("Error");
+
     }
 
 }

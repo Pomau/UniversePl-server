@@ -30,6 +30,12 @@ public class ProfileService extends MainService {
         return toModel(user);
     }
 
+    public Profile getById(String id) throws UserNotFoundException {
+        ProfileEntity user = profileRepo.findById(id).orElse(new ProfileEntity());
+        checkHavePeople(user);
+        return toModel(user);
+    }
+
     public Profile getByPublicKey(String key) throws UserNotFoundException {
         ProfileEntity user = profileRepo.findByPublicKey(key);
         checkHavePeople(user);
@@ -37,7 +43,7 @@ public class ProfileService extends MainService {
     }
 
     public Profile updateSession(ProfileEntity user, String session) {
-        ProfileEntity userEntity = profileRepo.findById(user.getId()).get();
+        ProfileEntity userEntity = profileRepo.findById(user.getId()).orElse(new ProfileEntity());
         userEntity.setSessionKey(session);
         profileRepo.save(userEntity);
         return toModel(userEntity);
@@ -49,13 +55,13 @@ public class ProfileService extends MainService {
     }
 
     public ProfileEntity getEntity(Profile profile) throws UserNotFoundException {
-        ProfileEntity user = profileRepo.findById(profile.getId()).get();
+        ProfileEntity user = profileRepo.findById(profile.getId()).orElse(new ProfileEntity());
         checkHavePeople(user);
         return user;
     }
 
     public void checkHavePeople(ProfileEntity profile) throws UserNotFoundException {
-        if (profile == null || profile.getId().isEmpty()) {
+        if (profile == null || profile.getId() == null) {
             throw new UserNotFoundException("Пользователь не найден");
         }
     }

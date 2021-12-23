@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.pomau.security.additional.Security;
 import ru.pomau.security.entity.ProfileEntity;
+import ru.pomau.security.exception.UserAlreadyExistException;
+import ru.pomau.security.exception.UserNotFoundException;
 import ru.pomau.security.models.Profile;
 import ru.pomau.security.service.ProfileService;
 
@@ -30,45 +32,32 @@ public class ProfileController {
 
     @PostMapping("/get")
     public List<Profile> profileSearch(@RequestBody Profile profile) {
-        try {
-            return profileService.findPeople(profile.getUsername());
-        } catch (Exception e){
-            System.out.println(profile);
-            return null;
-        }
+        return profileService.findPeople(profile.getUsername());
     }
 
     @PostMapping("/create")
-    public Profile profileSearch(@RequestBody ProfileEntity profileEntity) {
-        try {
-            String hash = security.generatorToken(profileEntity.getTokenAccess());
-            profileEntity.setTokenAccess(hash);
-            Profile profile = profileService.registration(profileEntity);
-            return profile;
-        } catch (Exception e){
-            return null;
-        }
+    public Profile profileSearch(@RequestBody ProfileEntity profileEntity) throws UserAlreadyExistException {
+        String hash = security.generatorToken(profileEntity.getTokenAccess());
+        profileEntity.setTokenAccess(hash);
+        Profile profile = profileService.registration(profileEntity);
+        return profile;
     }
 
     @PostMapping("/session")
-    public ResponseEntity<?> sessionCreate(@RequestBody ProfileEntity profileEntity, HttpServletResponse response) {
-        try {
-            Profile profileModel = profileService.getByPublicKey(profileEntity.getPublicKey());
-            ProfileEntity profile = profileService.getEntity(profileModel);
-            if (security.verifyToken(profile.getTokenAccess(), profileEntity.getTokenAccess())) {
-                String session = security.generateSession();
-                profileService.updateSession(profile, session);
+    public ResponseEntity<?> sessionCreate(@RequestBody ProfileEntity profileEntity, HttpServletResponse response) throws UserNotFoundException {
+        Profile profileModel = profileService.getByPublicKey(profileEntity.getPublicKey());
+        ProfileEntity profile = profileService.getEntity(profileModel);
+        if (security.verifyToken(profile.getTokenAccess(), profileEntity.getTokenAccess())) {
+            String session = security.generateSession();
+            profileService.updateSession(profile, session);
 
-                response.addCookie(createCookie("session", session));
-                response.setContentType("text/plain");
-                System.out.println(session);
-                return ResponseEntity.ok().body(HttpStatus.OK);
-            }
-
-        } catch (Exception e){
-            return ResponseEntity.badRequest().body("Fail ");
+            response.addCookie(createCookie("session", session));
+            response.setContentType("text/plain");
+            System.out.println(session);
+            return ResponseEntity.ok().body(HttpStatus.OK);
+        } else {
+            throw new UserNotFoundException("Пользователь не найден");
         }
-        return  ResponseEntity.badRequest().body("Fail ");
     }
 
     private Cookie createCookie(String name, String value) {

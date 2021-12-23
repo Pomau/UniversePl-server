@@ -21,43 +21,47 @@ public class ProfileService extends MainService {
         if (profileRepo.findByUsername(user.getUsername()) != null) {
             throw new UserAlreadyExistException("Пользователь с таким именем существует");
         }
-        return Profile.toModel(profileRepo.save(user));
+        return toModel(profileRepo.save(user));
     }
 
     public Profile getBySession(String session) throws UserNotFoundException {
         ProfileEntity user = profileRepo.findBySessionKey(session);
-        if (user == null) {
-            throw new UserNotFoundException("Пользователь не найден");
-        }
-        return Profile.toModel(user);
+        checkHavePeople(user);
+        return toModel(user);
     }
 
     public Profile getByPublicKey(String key) throws UserNotFoundException {
         ProfileEntity user = profileRepo.findByPublicKey(key);
-        if (user == null) {
-            throw new UserNotFoundException("Пользователь не найден");
-        }
-        return Profile.toModel(user);
+        checkHavePeople(user);
+        return toModel(user);
     }
 
     public Profile updateSession(ProfileEntity user, String session) {
         ProfileEntity userEntity = profileRepo.findById(user.getId()).get();
         userEntity.setSessionKey(session);
         profileRepo.save(userEntity);
-        return Profile.toModel(userEntity);
+        return toModel(userEntity);
     }
 
     public List<Profile> findPeople(String username) {
         List<ProfileEntity> userEntity = profileRepo.findAllByUsernameStartsWith(username);
-        return userEntity.stream().map(Profile::toModel).collect(Collectors.toList());
+        return userEntity.stream().map(this::toModel).collect(Collectors.toList());
     }
 
     public ProfileEntity getEntity(Profile profile) throws UserNotFoundException {
         ProfileEntity user = profileRepo.findById(profile.getId()).get();
-        if (user == null) {
+        checkHavePeople(user);
+        return user;
+    }
+
+    public void checkHavePeople(ProfileEntity profile) throws UserNotFoundException {
+        if (profile == null || profile.getId().isEmpty()) {
             throw new UserNotFoundException("Пользователь не найден");
         }
-        return user;
+    }
+
+    public Profile toModel(ProfileEntity entity) {
+        return Profile.toModel(entity);
     }
 
 }

@@ -7,7 +7,6 @@ import ru.pomau.security.entity.MessageEntity;
 import ru.pomau.security.entity.ProfileEntity;
 import ru.pomau.security.exception.UserAlreadyExistException;
 import ru.pomau.security.exception.UserNotFoundException;
-import ru.pomau.security.interfaces.ChatsObject;
 import ru.pomau.security.models.Chat;
 import ru.pomau.security.models.Message;
 import ru.pomau.security.models.Profile;

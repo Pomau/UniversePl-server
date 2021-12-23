@@ -2,14 +2,13 @@ package ru.pomau.security.entity;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
-import ru.pomau.security.interfaces.ChatsObject;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
 @Table(name="tokens")
-public class TokenEntity implements ChatsObject {
+public class TokenEntity {
 
     @Id
     @GeneratedValue(generator="system-uuid")

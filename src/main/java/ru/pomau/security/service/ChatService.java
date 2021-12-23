@@ -9,7 +9,6 @@ import ru.pomau.security.entity.ProfileEntity;
 import ru.pomau.security.exception.UpdateNotAvailableExistException;
 import ru.pomau.security.exception.UserAlreadyExistException;
 import ru.pomau.security.exception.UserNotFoundException;
-import ru.pomau.security.interfaces.ChatsObject;
 import ru.pomau.security.models.Chat;
 import ru.pomau.security.models.Profile;
 import ru.pomau.security.repo.ChatRepo;
@@ -25,7 +24,7 @@ import static java.lang.Math.min;
 public class ChatService extends MainService{
 
     public Chat create(ChatEntity chatEntity) throws UserAlreadyExistException {
-        List<ProfileEntity> a = chatEntity.getUsers().stream().collect(Collectors.toList());
+        List<ProfileEntity> a = new ArrayList<>(chatEntity.getUsers());
         List<ChatEntity> chats = chatRepo.findByUsers(a.get(0));
         for (ChatEntity chat : chats) {
             if (chat.getUsers().contains(a.get(1))) {
@@ -35,24 +34,19 @@ public class ChatService extends MainService{
         return Chat.toModel(chatRepo.save(chatEntity));
     }
 
-    public List<Chat> findAll(Profile profile, Integer page) throws UserAlreadyExistException {
+    public List<Chat> findAll(Profile profile, Integer page) {
         ProfileEntity user = profileRepo.findById(profile.getId()).get();
         List<ChatEntity> chats = chatRepo.findByUsersOrderByLastMessageDesc(user, PageRequest.of(page - 1, 100));
-//        List<ChatEntity> chatsEntity = (ChatEntity) paginator(chats, page, 100);
         return chats.stream().map(Chat::toModel).collect(Collectors.toList());
     }
 
-    public List<Chat> findNoWorkChat(Profile profile) throws UserAlreadyExistException {
+    public List<Chat> findNoWorkChat(Profile profile) {
         ProfileEntity user = profileRepo.findById(profile.getId()).get();
         Set<ChatEntity> chats = chatRepo.findByUsersAndStatusLessThan(user, 4);
 
-        for (Iterator<ChatEntity> iterator = chats.iterator(); iterator.hasNext();) {
-            ChatEntity chatEntity = (ChatEntity) iterator.next();
-            if (!(chatEntity.getCreateUser().getId().equals(user.getId()) && (chatEntity.getStatus() == 1 || chatEntity.getStatus() == 3)
-                || !chatEntity.getCreateUser().getId().equals(user.getId()) && chatEntity.getStatus() == 2)) {
-                iterator.remove();
-            }
-        }
+        chats.removeIf(chatEntity ->
+                !(chatEntity.getCreateUser().getId().equals(user.getId()) && chatEntity.getStatus() % 2 == 1
+                || !chatEntity.getCreateUser().getId().equals(user.getId()) && chatEntity.getStatus() == 2));
         return chats.stream().map(Chat::toModel).collect(Collectors.toList());
     }
 
@@ -73,23 +67,25 @@ public class ChatService extends MainService{
     }
 
     public ChatEntity getEntity(Chat chat) throws UserNotFoundException {
-        Optional<ChatEntity> chatEntity = chatRepo.findById(chat.getId());
-        if (chatEntity == null || chatEntity.isEmpty()) {
-            throw new UserNotFoundException("Пользователь не найден");
-        }
-        return chatEntity.get();
+        ChatEntity chatEntity = chatRepo.findById(chat.getId()).get();
+        checkHaveChat(chatEntity);
+        return chatEntity;
     }
 
     public Chat findById(String id) throws UserNotFoundException {
-        Optional<ChatEntity> chatEntity = chatRepo.findById(id);
-        if (chatEntity == null || chatEntity.isEmpty()) {
-            throw new UserNotFoundException("Пользователь не найден");
-        }
-        return Chat.toModel(chatEntity.get());
+        ChatEntity chatEntity = chatRepo.findById(id).get();
+        checkHaveChat(chatEntity);
+        return Chat.toModel(chatEntity);
     }
 
     public Chat updateStep(ChatEntity chatEntity) {
         return Chat.toModel(chatRepo.save(chatEntity));
+    }
+
+    public void checkHaveChat(ChatEntity chat) throws UserNotFoundException {
+        if (chat == null || chat.getId().isEmpty()) {
+            throw new UserNotFoundException("Чат не найден");
+        }
     }
 
 }

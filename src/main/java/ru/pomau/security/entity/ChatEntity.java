@@ -1,7 +1,6 @@
 package ru.pomau.security.entity;
 
 import org.hibernate.annotations.GenericGenerator;
-import ru.pomau.security.interfaces.ChatsObject;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -10,7 +9,7 @@ import java.util.Set;
 
 @Entity
 @Table(name="chats")
-public class ChatEntity implements ChatsObject {
+public class ChatEntity {
 
     @Id
     @GeneratedValue(generator="system-uuid")

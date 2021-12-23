@@ -1,14 +1,12 @@
 package ru.pomau.security.entity;
 
 import org.hibernate.annotations.GenericGenerator;
-import ru.pomau.security.interfaces.ChatsObject;
 
 import javax.persistence.*;
-import java.util.Set;
 
 @Entity
 @Table(name="profiles")
-public class ProfileEntity implements ChatsObject {
+public class ProfileEntity {
 
     @Id
     @GeneratedValue(generator="system-uuid")

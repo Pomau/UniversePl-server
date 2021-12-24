@@ -10,7 +10,7 @@ import ru.pomau.security.entity.MessageEntity;
 import ru.pomau.security.entity.ProfileEntity;
 import ru.pomau.security.entity.TokenEntity;
 import ru.pomau.security.exception.UserNotFoundException;
-import ru.pomau.security.exception.СantСreateException;
+import ru.pomau.security.exception.CantCreateException;
 import ru.pomau.security.models.Chat;
 import ru.pomau.security.models.Message;
 import ru.pomau.security.models.Profile;
@@ -51,7 +51,7 @@ public class TokenController {
 
     @PostMapping("/create")
     public ResponseEntity<?> findNoWorkChat(@CookieValue("session") String session,
-                                            @RequestBody TokenEntity token) throws UserNotFoundException, СantСreateException {
+                                            @RequestBody TokenEntity token) throws UserNotFoundException, CantCreateException {
         ProfileEntity user = profileService.getEntity(profileService.getBySession(session));
         token.setUser(user);
         ChatEntity chatEntity = chatService.getEntity(chatService.findById(token.getChat().getId()));
@@ -65,7 +65,7 @@ public class TokenController {
             chatService.updateStep(chatEntity);
             return ResponseEntity.ok().body(HttpStatus.OK);
         }else {
-            throw new СantСreateException("Вы не можете создать токен");
+            throw new CantCreateException("Вы не можете создать токен");
         }
 
     }

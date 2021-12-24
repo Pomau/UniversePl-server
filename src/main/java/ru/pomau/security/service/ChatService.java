@@ -7,7 +7,7 @@ import ru.pomau.security.entity.ProfileEntity;
 import ru.pomau.security.exception.UpdateNotAvailableExistException;
 import ru.pomau.security.exception.UserAlreadyExistException;
 import ru.pomau.security.exception.UserNotFoundException;
-import ru.pomau.security.exception.СantСreateException;
+import ru.pomau.security.exception.CantCreateException;
 import ru.pomau.security.models.Chat;
 import ru.pomau.security.models.Profile;
 
@@ -20,10 +20,10 @@ import static java.lang.Math.min;
 @Service
 public class ChatService extends MainService{
 
-    public Chat create(ChatEntity chatEntity) throws UserAlreadyExistException, СantСreateException {
+    public Chat create(ChatEntity chatEntity) throws UserAlreadyExistException, CantCreateException {
         List<ProfileEntity> a = new ArrayList<>(chatEntity.getUsers());
         if (a.size() != 2 || a.get(0).equals(a.get(1))) {
-            throw new СantСreateException("Чат можно создать только для 2 пользователей");
+            throw new CantCreateException("Чат можно создать только для 2 пользователей");
         }
         List<ChatEntity> chats = chatRepo.findByUsers(a.get(0));
         for (ChatEntity chat : chats) {

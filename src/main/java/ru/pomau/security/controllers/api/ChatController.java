@@ -8,10 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.pomau.security.additional.Security;
 import ru.pomau.security.entity.ChatEntity;
 import ru.pomau.security.entity.ProfileEntity;
-import ru.pomau.security.exception.UpdateNotAvailableExistException;
-import ru.pomau.security.exception.UserAlreadyExistException;
-import ru.pomau.security.exception.UserNotFoundException;
-import ru.pomau.security.exception.СantСreateException;
+import ru.pomau.security.exception.*;
 import ru.pomau.security.models.Chat;
 import ru.pomau.security.models.Profile;
 import ru.pomau.security.service.ChatService;
@@ -58,7 +55,7 @@ public class ChatController {
 
     @PostMapping("/create")
     public Chat profileSearch(@CookieValue("session") String session,
-                              @RequestBody ChatEntity chatEntity) throws UserNotFoundException, UserAlreadyExistException, СantСreateException {
+                              @RequestBody ChatEntity chatEntity) throws UserNotFoundException, UserAlreadyExistException, CantCreateException {
         Profile user = profileService.getBySession(session);
         Set<ProfileEntity> users = chatEntity.getUsers();
         for (ProfileEntity userEntity: users) {
